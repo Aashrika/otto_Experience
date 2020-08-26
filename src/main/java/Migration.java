@@ -6,7 +6,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 
 @Slf4j
@@ -47,17 +47,22 @@ public class Migration {
     public void addNewEntry(JSONObject newObject) {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            // TODO check the suitable connection
+            // TODO change into the suitable connection
             Connection con = DriverManager.getConnection(
                     "jdbc:oracle:thin:@localhost:1521:xe", "system", "oracle");
-            Statement stmt = con.createStatement();
 
-            // TODO rename the table name and all fields
-//            String query = "INSERT INTO someTable" +
-//                    "SELECT * FROM "+ OPENJSON(newObject) +
-//                    "WITH (id int, nameOfField )";
+            //TODO change the name of table and fields
+            PreparedStatement preparedStatement = con.prepareStatement("insert into  Atable values ( ?, ? )");
+            JSONParser parser = new JSONParser();
 
-//            stmt.executeQuery(query);
+            String id = (String) newObject.get("id"); // from JSON tag
+            preparedStatement.setString(1, id); // to the Database table
+
+            String name = (String) newObject.get("name");
+            preparedStatement.setString(2, name);
+
+            preparedStatement.executeUpdate();
+
 
             con.close();
         } catch (Exception e) {
